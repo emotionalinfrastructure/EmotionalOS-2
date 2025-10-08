@@ -1,6 +1,48 @@
-node_modules
-dist
-.DS_Store
-server/public
+# Dependencies
+node_modules/
+.npm
+
+# Build outputs
+dist/
+build/
+server/public/
+*.tsbuildinfo
 vite.config.ts.*
 *.tar.gz
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/tmp/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+.nyc_output
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Replit (keep .replit for Replit deployment, remove if not needed)
+.config/
+.cache/
+.upm/
+replit.nix

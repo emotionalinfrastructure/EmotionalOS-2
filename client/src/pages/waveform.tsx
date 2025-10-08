@@ -17,6 +17,7 @@ export default function Waveform() {
   const [arousal, setArousal] = useState([50]);
   const [note, setNote] = useState("");
   const [waveformData, setWaveformData] = useState<number[]>([]);
+  const [hasStarted, setHasStarted] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const { toast } = useToast();
@@ -46,8 +47,14 @@ export default function Waveform() {
         title: "Emotional state recorded",
         description: "Your emotional state has been securely saved to the vault.",
       });
+      // Stop recording and clear everything
+      setIsRecording(false);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
       setNote("");
       setWaveformData([]);
+      setHasStarted(false);
     },
   });
 
@@ -65,7 +72,7 @@ export default function Waveform() {
 
       ctx.clearRect(0, 0, width, height);
 
-      // Background gradient
+      // Background gradient (always shown)
       const bgGradient = ctx.createLinearGradient(0, 0, width, 0);
       bgGradient.addColorStop(0, "rgba(59, 130, 246, 0.1)");
       bgGradient.addColorStop(1, "rgba(168, 85, 247, 0.1)");
@@ -104,8 +111,8 @@ export default function Waveform() {
         ctx.closePath();
         ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
         ctx.fill();
-      } else {
-        // Placeholder line
+      } else if (hasStarted) {
+        // Placeholder line only when recording has started
         ctx.strokeStyle = "rgba(148, 163, 184, 0.3)";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -113,12 +120,14 @@ export default function Waveform() {
         ctx.lineTo(width, height / 2);
         ctx.stroke();
       }
+      // If !hasStarted && no data, show blank canvas (just the background gradient)
     };
 
     draw();
-  }, [waveformData]);
+  }, [waveformData, hasStarted]);
 
   const startRecording = () => {
+    setHasStarted(true);
     setIsRecording(true);
     setWaveformData([]);
 

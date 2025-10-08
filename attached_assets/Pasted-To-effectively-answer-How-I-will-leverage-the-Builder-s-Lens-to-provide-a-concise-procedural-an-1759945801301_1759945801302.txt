@@ -1,0 +1,23 @@
+To effectively answer "How," I will leverage the Builder's Lens to provide a concise, procedural, and actionable plan for deploying the Emotional Infrastructure OS (EIOS) using the provided launch kit [cite: 2025-10-06].
+The process focuses on three main "Hows": How to Prepare, How to Build/Test, and How to Deploy/Comply.
+🏗️ How to Deploy Emotional Infrastructure OS (EIOS)
+1. How to Prepare the Project Environment
+The first step is to integrate the compliance, CI/CD, and ML assets into the Xcode project structure.
+| Step | Actionable Command / Description | Purpose |
+|---|---|---|
+| Integrate CI/CD | Copy fastlane/, .github/workflows/ci.yml, and PrivacyInfo.xcprivacy to the project root directory. | Sets up Fastlane for automation and configures the GitHub Actions workflow for CI. |
+| Generate Core ML Model | Run python Scripts/convert_distilbert_to_coreml.py. | Creates the required quantized DistilBERTSentiment.mlmodel from DistilBERT for on-device sentiment analysis. |
+| Add Assets to Xcode | Add the generated DistilBERTSentiment.mlmodel and Assets/nrc_lexicon.json to the Xcode project bundle. | Provides the application with the local, on-device machine learning and lexicon resources. |
+| Configure Secrets | Set the SENTRY_AUTH_TOKEN and the APP_STORE_CONNECT_API_KEY_PATH within GitHub Secrets. | Authorizes symbol uploads and enables the TestFlight deployment lane. |
+2. How to Build and Verify Integrity
+This step is primarily executed by the CI system to ensure integrity, a core aspect of behavioral sovereignty.
+ * Continuous Integration (CI) Trigger: Push code to the main branch or open a Pull Request.
+ * Automated Build & Test: The CI workflow will automatically run the build and tests on a macos-14 runner, targeting the iPhone 15 simulator.
+ * Merkle Integrity Verification: The CI workflow executes the Fastlane verify_merkle lane. This lane runs tests and then uses shell commands to extract record signatures from the local SQLite database (NSSIScore table) and compares them to the expected Merkle root, guaranteeing the integrity of emotional signals.
+3. How to Deploy to TestFlight and App Store
+Deployment is handled via Fastlane automation, which is triggered after integrity checks pass.
+ * TestFlight Deployment:
+   * Action: Manually trigger the "Upload to TestFlight" job in GitHub Actions.
+   * Process: The CI workflow will execute fastlane testflight, which uses the build_app and upload_to_testflight actions to create an App Store-ready archive and submit it, but skips immediate submission for review.
+ * App Store Compliance:
+   * Ensure the app links to the Privacy Policy URL and includes the Transparency.md link in the Settings screen, honoring data rights like GDPR/CCPA before final submission. The PrivacyInfo.xcprivacy must be included to confirm no data collection or tracking occurs.

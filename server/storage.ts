@@ -123,7 +123,7 @@ export class MemStorage implements IStorage {
       ...insertState,
       id,
       timestamp: new Date(),
-    };
+    } as EmotionalState;
     this.emotionalStates.set(id, state);
 
     // Create vault entry
@@ -168,7 +168,7 @@ export class MemStorage implements IStorage {
       ...insertEvent,
       id,
       timestamp: new Date(),
-    };
+    } as NssiEvent;
     this.nssiEvents.set(id, event);
 
     // Create vault entry
@@ -196,7 +196,7 @@ export class MemStorage implements IStorage {
     const log: SessionLog = {
       ...insertLog,
       id,
-    };
+    } as SessionLog;
     this.sessionLogs.set(id, log);
     return log;
   }
@@ -246,7 +246,7 @@ export class MemStorage implements IStorage {
       ...insertEntry,
       id,
       timestamp: new Date(),
-    };
+    } as VaultEntry;
     this.vaultEntries.set(id, entry);
     return entry;
   }
@@ -275,7 +275,7 @@ export class MemStorage implements IStorage {
       ...insertPattern,
       id,
       detectedAt: new Date(),
-    };
+    } as AnalyticsPattern;
     this.analyticsPatterns.set(id, pattern);
     return pattern;
   }

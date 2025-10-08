@@ -3,13 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Download, Lock, CheckCircle, Link as LinkIcon } from "lucide-react";
-import { VaultEntry } from "@shared/schema";
+import { EnrichedVaultEntry } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Vault() {
   const { toast } = useToast();
 
-  const { data: vaultEntries } = useQuery<VaultEntry[]>({
+  const { data: vaultEntries } = useQuery<EnrichedVaultEntry[]>({
     queryKey: ["/api/vault/entries"],
   });
 
@@ -201,6 +201,14 @@ export default function Vault() {
                         {new Date(entry.timestamp).toLocaleString()}
                       </span>
                     </div>
+                    {entry.contentSummary?.note && (
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">Note:</div>
+                        <div className="text-sm bg-background/50 p-2 rounded">
+                          {entry.contentSummary.note}
+                        </div>
+                      </div>
+                    )}
                     <div className="space-y-1">
                       <div className="text-xs text-muted-foreground">Hash:</div>
                       <div className="text-sm font-mono break-all bg-background/50 p-2 rounded">

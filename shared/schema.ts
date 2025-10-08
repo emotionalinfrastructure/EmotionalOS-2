@@ -98,3 +98,26 @@ export type InsertAnalyticsPattern = z.infer<typeof insertAnalyticsPatternSchema
 
 export type UserSettings = typeof userSettings.$inferSelect;
 export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>;
+
+// Enriched vault entry with content from referenced records
+export const enrichedVaultEntryContentSchema = z.object({
+  intensity: z.number().optional(),
+  valence: z.number().optional(),
+  arousal: z.number().optional(),
+  note: z.string().nullable().optional(),
+  severity: z.number().optional(),
+  triggerType: z.string().nullable().optional(),
+}).nullable();
+
+export const enrichedVaultEntrySchema = z.object({
+  id: z.string(),
+  timestamp: z.date(),
+  dataHash: z.string(),
+  entryType: z.string(),
+  referenceId: z.string(),
+  encryptionStatus: z.string(),
+  previousHash: z.string().nullable(),
+  contentSummary: enrichedVaultEntryContentSchema,
+});
+
+export type EnrichedVaultEntry = z.infer<typeof enrichedVaultEntrySchema>;

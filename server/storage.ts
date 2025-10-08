@@ -11,6 +11,7 @@ import {
   type InsertAnalyticsPattern,
   type UserSettings,
   type InsertUserSettings,
+  type EnrichedVaultEntry,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { createHash } from "crypto";
@@ -33,17 +34,21 @@ export interface IStorage {
   createSessionLog(log: InsertSessionLog): Promise<SessionLog>;
 
   // Vault Entries
-  getVaultEntries(): Promise<VaultEntry[]>;
+  getVaultEntries(): Promise<EnrichedVaultEntry[]>;
   createVaultEntry(entry: InsertVaultEntry): Promise<VaultEntry>;
   getLastVaultHash(): Promise<string | null>;
 
   // Analytics Patterns
   getAnalyticsPatterns(): Promise<AnalyticsPattern[]>;
-  createAnalyticsPattern(pattern: InsertAnalyticsPattern): Promise<AnalyticsPattern>;
+  createAnalyticsPattern(
+    pattern: InsertAnalyticsPattern,
+  ): Promise<AnalyticsPattern>;
 
   // User Settings
   getUserSettings(): Promise<UserSettings | undefined>;
-  updateUserSettings(settings: Partial<InsertUserSettings>): Promise<UserSettings>;
+  updateUserSettings(
+    settings: Partial<InsertUserSettings>,
+  ): Promise<UserSettings>;
 
   // Stats & Analytics
   getTodayStats(): Promise<{
@@ -88,8 +93,10 @@ export class MemStorage implements IStorage {
 
   // Emotional States
   async getEmotionalStates(limit?: number): Promise<EmotionalState[]> {
-    const states = Array.from(this.emotionalStates.values())
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const states = Array.from(this.emotionalStates.values()).sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
     return limit ? states.slice(0, limit) : states;
   }
 
@@ -98,14 +105,19 @@ export class MemStorage implements IStorage {
     cutoff.setDate(cutoff.getDate() - days);
     return Array.from(this.emotionalStates.values())
       .filter((state) => new Date(state.timestamp) >= cutoff)
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      );
   }
 
   async getRecentEmotionalStates(limit: number): Promise<EmotionalState[]> {
     return this.getEmotionalStates(limit);
   }
 
-  async createEmotionalState(insertState: InsertEmotionalState): Promise<EmotionalState> {
+  async createEmotionalState(
+    insertState: InsertEmotionalState,
+  ): Promise<EmotionalState> {
     const id = randomUUID();
     const state: EmotionalState = {
       ...insertState,
@@ -128,8 +140,10 @@ export class MemStorage implements IStorage {
 
   // NSSI Events
   async getNssiEvents(limit?: number): Promise<NssiEvent[]> {
-    const events = Array.from(this.nssiEvents.values())
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const events = Array.from(this.nssiEvents.values()).sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
     return limit ? events.slice(0, limit) : events;
   }
 
@@ -138,7 +152,10 @@ export class MemStorage implements IStorage {
     cutoff.setDate(cutoff.getDate() - days);
     return Array.from(this.nssiEvents.values())
       .filter((event) => new Date(event.timestamp) >= cutoff)
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      );
   }
 
   async getRecentNssiEvents(limit: number): Promise<NssiEvent[]> {
@@ -168,8 +185,10 @@ export class MemStorage implements IStorage {
 
   // Session Logs
   async getSessionLogs(): Promise<SessionLog[]> {
-    return Array.from(this.sessionLogs.values())
-      .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+    return Array.from(this.sessionLogs.values()).sort(
+      (a, b) =>
+        new Date(b.startTime).getTime() - new Date(a.startTime).getTime(),
+    );
   }
 
   async createSessionLog(insertLog: InsertSessionLog): Promise<SessionLog> {
@@ -183,9 +202,42 @@ export class MemStorage implements IStorage {
   }
 
   // Vault Entries
-  async getVaultEntries(): Promise<VaultEntry[]> {
-    return Array.from(this.vaultEntries.values())
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  async getVaultEntries(): Promise<EnrichedVaultEntry[]> {
+    const entries = Array.from(this.vaultEntries.values()).sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
+
+    // Enrich entries with content from referenced records
+    return entries.map((entry) => {
+      let contentSummary = null;
+
+      if (entry.entryType === "emotional_state") {
+        const state = this.emotionalStates.get(entry.referenceId);
+        if (state) {
+          contentSummary = {
+            intensity: state.intensity,
+            valence: state.valence,
+            arousal: state.arousal,
+            note: state.note,
+          };
+        }
+      } else if (entry.entryType === "nssi_event") {
+        const event = this.nssiEvents.get(entry.referenceId);
+        if (event) {
+          contentSummary = {
+            severity: event.severity,
+            triggerType: event.triggerType,
+            note: event.note,
+          };
+        }
+      }
+
+      return {
+        ...entry,
+        contentSummary,
+      };
+    });
   }
 
   async createVaultEntry(insertEntry: InsertVaultEntry): Promise<VaultEntry> {
@@ -200,18 +252,24 @@ export class MemStorage implements IStorage {
   }
 
   async getLastVaultHash(): Promise<string | null> {
-    const entries = Array.from(this.vaultEntries.values())
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const entries = Array.from(this.vaultEntries.values()).sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
     return entries[0]?.dataHash || null;
   }
 
   // Analytics Patterns
   async getAnalyticsPatterns(): Promise<AnalyticsPattern[]> {
-    return Array.from(this.analyticsPatterns.values())
-      .sort((a, b) => new Date(b.detectedAt).getTime() - new Date(a.detectedAt).getTime());
+    return Array.from(this.analyticsPatterns.values()).sort(
+      (a, b) =>
+        new Date(b.detectedAt).getTime() - new Date(a.detectedAt).getTime(),
+    );
   }
 
-  async createAnalyticsPattern(insertPattern: InsertAnalyticsPattern): Promise<AnalyticsPattern> {
+  async createAnalyticsPattern(
+    insertPattern: InsertAnalyticsPattern,
+  ): Promise<AnalyticsPattern> {
     const id = randomUUID();
     const pattern: AnalyticsPattern = {
       ...insertPattern,
@@ -240,7 +298,9 @@ export class MemStorage implements IStorage {
     return this.settings;
   }
 
-  async updateUserSettings(updates: Partial<InsertUserSettings>): Promise<UserSettings> {
+  async updateUserSettings(
+    updates: Partial<InsertUserSettings>,
+  ): Promise<UserSettings> {
     const current = await this.getUserSettings();
     this.settings = { ...current!, ...updates };
     return this.settings;
@@ -256,19 +316,24 @@ export class MemStorage implements IStorage {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const todayStates = Array.from(this.emotionalStates.values())
-      .filter((state) => new Date(state.timestamp) >= today);
+    const todayStates = Array.from(this.emotionalStates.values()).filter(
+      (state) => new Date(state.timestamp) >= today,
+    );
 
-    const todayNssi = Array.from(this.nssiEvents.values())
-      .filter((event) => new Date(event.timestamp) >= today);
+    const todayNssi = Array.from(this.nssiEvents.values()).filter(
+      (event) => new Date(event.timestamp) >= today,
+    );
 
-    const avgIntensity = todayStates.length > 0
-      ? todayStates.reduce((sum, s) => sum + s.intensity, 0) / todayStates.length
-      : 0;
+    const avgIntensity =
+      todayStates.length > 0
+        ? todayStates.reduce((sum, s) => sum + s.intensity, 0) /
+          todayStates.length
+        : 0;
 
-    const peakIntensity = todayStates.length > 0
-      ? Math.max(...todayStates.map((s) => s.intensity))
-      : 0;
+    const peakIntensity =
+      todayStates.length > 0
+        ? Math.max(...todayStates.map((s) => s.intensity))
+        : 0;
 
     return {
       avgIntensity,
@@ -286,27 +351,35 @@ export class MemStorage implements IStorage {
     weeklyAverage: { day: string; avg: number }[];
   }> {
     const allStates = Array.from(this.emotionalStates.values());
-    const avgIntensity = allStates.length > 0
-      ? allStates.reduce((sum, s) => sum + s.intensity, 0) / allStates.length
-      : 0;
+    const avgIntensity =
+      allStates.length > 0
+        ? allStates.reduce((sum, s) => sum + s.intensity, 0) / allStates.length
+        : 0;
 
     // Calculate trend (last 7 days vs previous 7 days)
     const now = new Date();
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const prev7Days = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-    const recentStates = allStates.filter((s) => new Date(s.timestamp) >= last7Days);
+    const recentStates = allStates.filter(
+      (s) => new Date(s.timestamp) >= last7Days,
+    );
     const previousStates = allStates.filter(
-      (s) => new Date(s.timestamp) >= prev7Days && new Date(s.timestamp) < last7Days
+      (s) =>
+        new Date(s.timestamp) >= prev7Days && new Date(s.timestamp) < last7Days,
     );
 
-    const recentAvg = recentStates.length > 0
-      ? recentStates.reduce((sum, s) => sum + s.intensity, 0) / recentStates.length
-      : 0;
+    const recentAvg =
+      recentStates.length > 0
+        ? recentStates.reduce((sum, s) => sum + s.intensity, 0) /
+          recentStates.length
+        : 0;
 
-    const prevAvg = previousStates.length > 0
-      ? previousStates.reduce((sum, s) => sum + s.intensity, 0) / previousStates.length
-      : 0;
+    const prevAvg =
+      previousStates.length > 0
+        ? previousStates.reduce((sum, s) => sum + s.intensity, 0) /
+          previousStates.length
+        : 0;
 
     let trendDirection: "up" | "down" | "stable" = "stable";
     if (recentAvg > prevAvg + 5) trendDirection = "up";
@@ -315,16 +388,18 @@ export class MemStorage implements IStorage {
     // Weekly average by day
     const weeklyAverage: { day: string; avg: number }[] = [];
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const dayStates = allStates.filter((s) => {
         const sDate = new Date(s.timestamp);
         return sDate.toDateString() === date.toDateString();
       });
-      const dayAvg = dayStates.length > 0
-        ? dayStates.reduce((sum, s) => sum + s.intensity, 0) / dayStates.length
-        : 0;
+      const dayAvg =
+        dayStates.length > 0
+          ? dayStates.reduce((sum, s) => sum + s.intensity, 0) /
+            dayStates.length
+          : 0;
       weeklyAverage.push({ day: days[date.getDay()], avg: dayAvg });
     }
 
@@ -344,11 +419,16 @@ export class MemStorage implements IStorage {
     chainIntegrity: boolean;
   }> {
     const entries = Array.from(this.vaultEntries.values());
-    const encryptedEntries = entries.filter((e) => e.encryptionStatus === "encrypted").length;
+    const encryptedEntries = entries.filter(
+      (e) => e.encryptionStatus === "encrypted",
+    ).length;
     const lastHash = (await this.getLastVaultHash()) || "";
 
     // Check chain integrity
-    const sorted = entries.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    const sorted = entries.sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    );
     let chainIntegrity = true;
     for (let i = 1; i < sorted.length; i++) {
       if (sorted[i].previousHash !== sorted[i - 1].dataHash) {

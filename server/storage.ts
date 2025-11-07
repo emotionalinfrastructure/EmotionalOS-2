@@ -460,4 +460,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Import the PrismaStorage implementation
+import { prismaStorage } from "./prisma-storage";
+
+export const storage = prismaStorage;

@@ -1,0 +1,77 @@
+import { Router } from "express";
+import { z } from "zod";
+import crypto from "crypto";
+import { db } from "./db";
+
+const r = Router();
+const USER_ID = async () => {
+  const u = await db.user.findFirst({ where: { email: "local@emotional.os" }});
+  return u?.id!;
+};
+const hash = (o: unknown) =>
+  crypto.createHash("sha256").update(JSON.stringify(o)).digest("hex");
+
+// Create EmotionalState
+r.post("/state", async (req, res) => {
+  const Body = z.object({
+    intensity: z.number().min(0).max(100),
+    valence: z.number().min(-100).max(100),
+    arousal: z.number().min(0).max(100),
+    sessionId: z.string().optional(),
+    tags: z.array(z.string()).default([]),
+    waveform: z.string().optional()
+  });
+  const data = Body.parse(req.body);
+  const userId = await USER_ID();
+  const state = await db.emotionalState.create({ data: { userId, ...data } });
+
+  // Write to vault (hash-chain)
+  const last = await db.vaultEntry.findFirst({
+    where: { userId }, orderBy: { chainIndex: "desc" }
+  });
+  const body = { userId, kind: "state", payload: { id: state.id }, prevHash: last?.sha256 ?? null, chainIndex: (last?.chainIndex ?? -1)+1 };
+  const sha = hash(body);
+  await db.vaultEntry.create({
+    data: {
+      userId, kind: "state",
+      payload: { id: state.id, valence: state.valence, arousal: state.arousal } as any,
+      prevHash: last?.sha256,
+      chainIndex: body.chainIndex,
+      sha256: sha
+    }
+  });
+
+  res.json(state);
+});
+
+// Read history (last N days)
+r.get("/history", async (req, res) => {
+  const userId = await USER_ID();
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const states = await db.emotionalState.findMany({
+    where: { userId, recordedAt: { gte: since } },
+    orderBy: { recordedAt: "asc" }
+  });
+  res.json({ states });
+});
+
+// Export vault (JSON) with verification
+r.get("/export/vault.json", async (_req, res) => {
+  const userId = await USER_ID();
+  const entries = await db.vaultEntry.findMany({
+    where: { userId }, orderBy: { chainIndex: "asc" }
+  });
+
+  // verify chain
+  let prev: string | null = null;
+  let ok = true;
+  for (const e of entries) {
+    const body = { userId, kind: e.kind, payload: e.payload, prevHash: prev, chainIndex: e.chainIndex };
+    const h = hash(body);
+    if (h !== e.sha256) { ok = false; break; }
+    prev = e.sha256;
+  }
+  res.json({ verified: ok, count: entries.length, entries });
+});
+
+export default r;

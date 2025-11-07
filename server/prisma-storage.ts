@@ -349,14 +349,23 @@ export class PrismaStorage implements IStorage {
   async createVaultEntry(insertEntry: InsertVaultEntry): Promise<VaultEntry> {
     const userId = await this.getUserId();
     
+    // Get last vault entry to derive chain index and previous hash
+    const lastVault = await db.vaultEntry.findFirst({
+      where: { userId },
+      orderBy: { chainIndex: "desc" },
+    });
+
+    const chainIndex = (lastVault?.chainIndex ?? -1) + 1;
+    const prevHash = lastVault?.sha256 ?? null;
+    
     const entry = await db.vaultEntry.create({
       data: {
         userId,
         kind: insertEntry.entryType,
         payload: JSON.stringify({ referenceId: insertEntry.referenceId }),
         sha256: insertEntry.dataHash,
-        prevHash: insertEntry.previousHash ?? null,
-        chainIndex: 0,
+        prevHash,
+        chainIndex,
       },
     });
 

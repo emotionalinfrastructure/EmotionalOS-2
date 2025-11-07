@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String?        @unique
+  displayName   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  settings      UserSettings?
+  sessions      SessionLog[]
+  states        EmotionalState[]
+  nssiEvents    NssiEvent[]
+  vaultEntries  VaultEntry[]
+  patterns      AnalyticsPattern[]
+  @@index([createdAt])
+}
+
+model UserSettings {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  theme             String   @default("system")
+  privacyMode       Boolean  @default(true)
+  dataRetentionDays Int      @default(365)
+  exportFormat      String   @default("json")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SessionLog {
+  id            String    @id @default(cuid())
+  userId        String
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  durationSec   Int?
+  note          String?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  states        EmotionalState[]
+  @@index([userId, startedAt])
+}
+
+model EmotionalState {
+  id          String    @id @default(cuid())
+  userId      String
+  sessionId   String?
+  intensity   Int
+  valence     Int
+  arousal     Int
+  waveform    String?
+  tags        String
+  recordedAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session     SessionLog? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  @@index([userId, recordedAt])
+  @@index([sessionId])
+}
+
+model NssiEvent {
+  id            String    @id @default(cuid())
+  userId        String
+  severity      Int
+  triggerType   String?
+  intervention  String?
+  notes         String?
+  occurredAt    DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, occurredAt])
+  @@index([severity])
+}
+
+model VaultEntry {
+  id            String    @id @default(cuid())
+  userId        String
+  kind          String
+  payload       String
+  sha256        String
+  prevHash      String?
+  chainIndex    Int       @default(0)
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, chainIndex])
+  @@index([userId, createdAt])
+}
+
+model AnalyticsPattern {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  params      String
+  detectedAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, detectedAt])
+}

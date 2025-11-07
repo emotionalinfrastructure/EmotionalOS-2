@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"         // change to "postgresql" when ready
+  url      = env("DATABASE_URL")
+}
+
+/*
+ Core domain: multi-tenant ready but works fine for single-user.
+ Emotional state samples can exist standalone or inside a SessionLog.
+*/
+
+model User {
+  id            String         @id @default(cuid())
+  email         String?        @unique
+  displayName   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  // relations
+  settings      UserSettings?
+  sessions      SessionLog[]
+  states        EmotionalState[]
+  nssiEvents    NssiEvent[]
+  vaultEntries  VaultEntry[]
+  patterns      AnalyticsPattern[]
+  @@index([createdAt])
+}
+
+model UserSettings {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  theme             String   @default("system") // light | dark | system
+  privacyMode       Boolean  @default(true)     // UI masking
+  dataRetentionDays Int      @default(365)      // purge policy
+  exportFormat      String   @default("json")   // json | csv
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SessionLog {
+  id            String    @id @default(cuid())
+  userId        String
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  durationSec   Int?      // denormalized for quick charts
+  note          String?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  states        EmotionalState[]
+  @@index([userId, startedAt])
+}
+
+model EmotionalState {
+  id          String    @id @default(cuid())
+  userId      String
+  sessionId   String?   // nullable: ad-hoc entries allowed
+  // Russell circumplex + intensity
+  intensity   Int       // 0..100
+  valence     Int       // -100..100 (negative..positive)
+  arousal     Int       // 0..100 (low..high)
+  // Optional waveform sample (compressed JSON string or small blob)
+  waveform    String?
+  tags        String[]  // e.g. ["grounding","panic-recovery"]
+  recordedAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session     SessionLog? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  @@index([userId, recordedAt])
+  @@index([sessionId])
+}
+
+model NssiEvent {
+  id            String    @id @default(cuid())
+  userId        String
+  severity      Int       // 0..10
+  triggerType   String?   // e.g. "interpersonal","memory","digital"
+  intervention  String?   // e.g. "call-friend","box-breathing"
+  notes         String?
+  occurredAt    DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, occurredAt])
+  @@index([severity])
+}
+
+model VaultEntry {
+  id            String    @id @default(cuid())
+  userId        String
+  kind          String    // "state" | "nssi" | "session" | "note" | "export"
+  payload       Json      // canonical, minimal record
+  sha256        String    // content hash of payload
+  prevHash      String?   // for hash-chain immutability
+  chainIndex    Int       @default(0)
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, chainIndex])
+  @@index([userId, createdAt])
+}
+
+model AnalyticsPattern {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String    // e.g. "evening-spike","weekend-relief"
+  description String?
+  // Minimal, model-agnostic params for AI or rule engines
+  params      Json
+  detectedAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, detectedAt])
+}

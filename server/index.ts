@@ -1,3 +1,6 @@
+// Set DATABASE_URL for SQLite before any imports
+process.env.DATABASE_URL = process.env.DATABASE_URL || "file:./prisma/dev.db";
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";

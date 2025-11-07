@@ -193,6 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await storage.getTodayStats();
       res.json(stats);
     } catch (error) {
+      console.error("Error fetching today's stats:", error);
       res.status(500).json({ error: "Failed to fetch today's stats" });
     }
   });

@@ -463,8 +463,8 @@ export class PrismaStorage implements IStorage {
       where: { userId },
       data: {
         ...(updates.theme && { theme: updates.theme }),
-        ...(updates.privacyMode !== undefined && { privacyMode: updates.privacyMode }),
-        ...(updates.dataRetentionDays !== undefined && { dataRetentionDays: updates.dataRetentionDays }),
+        ...(updates.privacyMode != null && { privacyMode: updates.privacyMode }),
+        ...(updates.dataRetentionDays != null && { dataRetentionDays: updates.dataRetentionDays }),
         ...(updates.exportFormat && { exportFormat: updates.exportFormat }),
       },
     });

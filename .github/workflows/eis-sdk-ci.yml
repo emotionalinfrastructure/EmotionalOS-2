@@ -4,16 +4,17 @@ name: EIS SDK CI
 # .github/workflows directory, so the SDK's own packaged workflow
 # (eis-sdk/.github/workflows/ci.yml) is NOT executed by this repo.
 #
-# For first-proof verification this workflow runs aggressively: it has no
-# branch filter and no path filter, so it triggers on every push (any
-# branch) and every pull request, plus a manual Run workflow button. Once
-# it is green you can tighten it by re-adding:
-#   paths:
-#     - 'eis-sdk/**'
-#     - '.github/workflows/eis-sdk-ci.yml'
+# Scoped to SDK changes: runs on pushes and pull requests that touch
+# eis-sdk/** or this workflow file, plus a manual Run workflow button.
 on:
   push:
+    paths:
+      - 'eis-sdk/**'
+      - '.github/workflows/eis-sdk-ci.yml'
   pull_request:
+    paths:
+      - 'eis-sdk/**'
+      - '.github/workflows/eis-sdk-ci.yml'
   workflow_dispatch:
 
 defaults:

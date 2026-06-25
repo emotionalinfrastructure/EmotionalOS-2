@@ -1,0 +1,58 @@
+name: EIS SDK CI
+
+# GitHub Actions only discovers workflows in the repository-root
+# .github/workflows directory, so the SDK's own packaged workflow
+# (eis-sdk/.github/workflows/ci.yml) is NOT executed by this repo.
+#
+# Scoped to SDK changes: runs on pushes and pull requests that touch
+# eis-sdk/** or this workflow file, plus a manual Run workflow button.
+on:
+  push:
+    paths:
+      - 'eis-sdk/**'
+      - '.github/workflows/eis-sdk-ci.yml'
+  pull_request:
+    paths:
+      - 'eis-sdk/**'
+      - '.github/workflows/eis-sdk-ci.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: eis-sdk
+
+jobs:
+  verify:
+    name: Verify eis-sdk
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: eis-sdk/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck --if-present
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Unit tests
+        run: npm test --if-present
+
+      - name: Build
+        run: npm run build --if-present
+
+      - name: Pack (dry run)
+        run: npm pack --dry-run

@@ -43,10 +43,13 @@
     "verify": "npm run typecheck && npm run lint && npm test && npm run build",
     "prepublishOnly": "npm run verify"
   },
-  "dependencies": {},
+  "dependencies": {
+    "uuid": "^10.0.0"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.17",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.56.0",

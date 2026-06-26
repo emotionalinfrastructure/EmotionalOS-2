@@ -4,7 +4,8 @@
 **Version:** `0.2.0`  
 **Author:** Brittany Wright  
 **License:** Apache-2.0  
-**Status:** Release candidate
+**Status:** Release candidate  
+**Dependencies:** Minimal runtime dependency footprint; `uuid` is the only runtime dependency
 
 The Emotional Infrastructure™ Standard SDK is a TypeScript governance library for implementing consent lifecycle management, audit traceability, tolerance windows, and trust repair workflows in adaptive AI systems.
 
@@ -199,10 +200,6 @@ npm test
 npm run build
 ```
 
-## Trademark
-
-Emotional Infrastructure™ is a trademark of Brittany Wright.
-
 ## License
 
-Apache License 2.0.
+Code is licensed under Apache License 2.0. Emotional Infrastructure™ is a trademark of Brittany Wright.

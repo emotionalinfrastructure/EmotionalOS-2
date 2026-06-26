@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { TrendingUp, TrendingDown, Activity, Brain, AlertTriangle } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, Brain, AlertTriangle, Gauge } from "lucide-react";
 import { AnalyticsPattern } from "@shared/schema";
+import { SessionReport, ToneGroupSummary } from "@shared/session-report";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function Analytics() {
@@ -18,6 +19,14 @@ export default function Analytics() {
     weeklyAverage: { day: string; avg: number }[];
   }>({
     queryKey: ["/api/analytics/summary"],
+  });
+
+  const { data: sessionReport } = useQuery<SessionReport>({
+    queryKey: ["/api/analytics/session-report"],
+  });
+
+  const { data: toneSummary } = useQuery<ToneGroupSummary[]>({
+    queryKey: ["/api/analytics/tone-summary"],
   });
 
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
@@ -86,6 +95,72 @@ export default function Analytics() {
               {summary?.totalNssiEvents || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1">All time</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Session Pulse - tone, coherence and trend over the most recent recordings */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gauge className="h-4 w-4 text-muted-foreground" />
+              Session Pulse
+            </CardTitle>
+            <CardDescription>Tone, coherence and trend from your most recent recordings</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Tone</span>
+              <span className="font-semibold" data-testid="text-session-tone">
+                {sessionReport?.tone ?? "—"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Coherence</span>
+              <span className="font-mono font-medium" data-testid="text-session-coherence">
+                {sessionReport ? sessionReport.coherence.toFixed(2) : "—"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Trend</span>
+              <span className="font-medium" data-testid="text-session-trend">
+                {sessionReport?.trend ?? "—"}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground pt-1">
+              Based on the last {sessionReport?.sampleSize ?? 0} recorded states
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Tone Breakdown</CardTitle>
+            <CardDescription>How your recorded states group by tone over the last 30 days</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {toneSummary && toneSummary.length > 0 ? (
+              <div className="space-y-3">
+                {toneSummary.map((group) => (
+                  <div
+                    key={group.tone}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                    data-testid={`tone-group-${group.tone}`}
+                  >
+                    <span className="font-medium">{group.tone}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {group.count} {group.count === 1 ? "entry" : "entries"}
+                    </span>
+                    <span className="font-mono text-sm">Coherence: {group.avgCoherence.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-[120px] flex items-center justify-center text-muted-foreground">
+                No tone data available yet
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

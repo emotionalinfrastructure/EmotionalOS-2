@@ -8,6 +8,7 @@ import {
   insertAnalyticsPatternSchema,
   insertUserSettingsSchema,
 } from "@shared/schema";
+import { buildSessionReport, summarizeByTone } from "@shared/session-report";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Emotional States
@@ -184,6 +185,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(summary);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch analytics summary" });
+    }
+  });
+
+  app.get("/api/analytics/session-report", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const states = await storage.getRecentEmotionalStates(limit);
+      res.json(buildSessionReport(states));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to build session report" });
+    }
+  });
+
+  app.get("/api/analytics/session-report/export", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const states = await storage.getRecentEmotionalStates(limit);
+      const report = buildSessionReport(states);
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="EmotionalOS_Sessions_${Date.now()}.json"`,
+      );
+      res.json(report);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to export session report" });
+    }
+  });
+
+  app.get("/api/analytics/tone-summary", async (req, res) => {
+    try {
+      const days = req.query.days ? parseInt(req.query.days as string) : 30;
+      const states = await storage.getEmotionalStatesByDateRange(days);
+      res.json(summarizeByTone(states));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to summarize tone groups" });
     }
   });
 

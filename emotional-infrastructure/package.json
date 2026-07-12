@@ -1,0 +1,20 @@
+{
+  "name": "emotional-infrastructure",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Emotional Infrastructure Governance Runtime -- candidate governance architecture / reference implementation monorepo.",
+  "workspaces": [
+    "apps/web",
+    "packages/shared-schemas",
+    "packages/audit-ledger",
+    "packages/policy-engine",
+    "packages/eis-sdk"
+  ],
+  "scripts": {
+    "build:packages": "npm run build --workspace=packages/shared-schemas && npm run build --workspace=packages/audit-ledger && npm run build --workspace=packages/policy-engine && npm run build --workspace=packages/eis-sdk",
+    "test:packages": "npm run test --workspace=packages/shared-schemas && npm run test --workspace=packages/audit-ledger && npm run test --workspace=packages/policy-engine && npm run test --workspace=packages/eis-sdk",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build:web": "npm run build --workspace=apps/web"
+  },
+  "license": "Apache-2.0"
+}

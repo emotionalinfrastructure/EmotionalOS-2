@@ -1,0 +1,48 @@
+# Production overlay: helm install ei-middleware ./ei-middleware -f values-production.yaml
+# Every REQUIRED_* placeholder below must be replaced before deploying.
+# This chart has not been deployed to or validated against a real
+# production Kubernetes cluster -- see docs/VALIDATION_PLAN.md and
+# docs/CLAIM_BOUNDARY.md. Do not treat this overlay as a certified or
+# production-validated deployment path.
+
+api:
+  image:
+    repository: REQUIRED_SET_PRODUCTION_IMAGE_REPO/ei-middleware-api
+    tag: "REQUIRED_SET_IMAGE_TAG"
+  replicaCount: 3
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  env:
+    jwtIssuer: "REQUIRED_SET_PRODUCTION_ISSUER_URL"
+    corsOrigins: "REQUIRED_SET_PRODUCTION_CORS_ORIGIN"
+
+web:
+  image:
+    repository: REQUIRED_SET_PRODUCTION_IMAGE_REPO/ei-middleware-web
+    tag: "REQUIRED_SET_IMAGE_TAG"
+  replicaCount: 3
+  env:
+    apiBaseUrl: "REQUIRED_SET_PRODUCTION_API_BASE_URL"
+
+postgres:
+  # Production should point at a managed database, not the in-chart
+  # Postgres deployment.
+  enabled: false
+
+secrets:
+  existingSecretName: "ei-middleware-production-secrets"
+  databaseUrl: "REQUIRED_SET_PRODUCTION_MANAGED_DATABASE_URL"
+
+ingress:
+  enabled: true
+  className: "REQUIRED_SET_INGRESS_CLASS"
+  host: "REQUIRED_SET_PRODUCTION_INGRESS_HOST"
+  tls:
+    enabled: true
+    secretName: "REQUIRED_SET_PRODUCTION_TLS_SECRET"
+  annotations: {}

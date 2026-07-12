@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ei
+      POSTGRES_PASSWORD: ei
+      POSTGRES_DB: emotional_infrastructure
+    ports:
+      - "5432:5432"
+    volumes:
+      - ei_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ei -d emotional_infrastructure"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: ../../
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      EI_DATABASE_URL: postgresql+psycopg://ei:ei@postgres:5432/emotional_infrastructure
+      EI_JWT_ISSUER: https://ei-governance-runtime.local
+      EI_JWT_AUDIENCE: ei-governance-runtime
+      EI_TOKEN_TTL_SECONDS: "300"
+      EI_LEDGER_HMAC_SECRET: ${EI_LEDGER_HMAC_SECRET:-change-me-in-production}
+      EI_CORS_ORIGINS: http://localhost:3000
+      EI_ENVIRONMENT: docker-compose-local
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ei_api_keys:/app/var/keys
+
+  web:
+    build:
+      context: ../../
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  ei_postgres_data:
+  ei_api_keys:

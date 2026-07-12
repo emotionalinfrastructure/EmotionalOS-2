@@ -1,0 +1,20 @@
+# Node
+node_modules/
+.next/
+dist/
+*.tsbuildinfo
+.turbo/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Env / secrets
+.env
+apps/api/var/keys/
+
+# OS
+.DS_Store

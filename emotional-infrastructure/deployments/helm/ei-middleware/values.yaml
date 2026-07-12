@@ -1,0 +1,74 @@
+# Default values for ei-middleware.
+# This file targets local/dev cluster use (e.g. kind/minikube). See
+# values-staging.yaml and values-production.yaml for environment overlays.
+# Deployment against a real Kubernetes cluster has not been executed as
+# part of this reference implementation -- see docs/VALIDATION_PLAN.md.
+
+api:
+  image:
+    repository: ei-middleware-api
+    tag: "REQUIRED_SET_IMAGE_TAG"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  port: 8000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  env:
+    jwtIssuer: https://ei-governance-runtime.local
+    jwtAudience: ei-governance-runtime
+    tokenTtlSeconds: "300"
+    policyUriDefault: https://ei-governance-runtime.local/policy/v1
+    corsOrigins: "REQUIRED_SET_CORS_ORIGIN"
+
+web:
+  image:
+    repository: ei-middleware-web
+    tag: "REQUIRED_SET_IMAGE_TAG"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  port: 3000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  env:
+    apiBaseUrl: "http://ei-middleware-api:8000"
+
+postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "16-alpine"
+  storage: 5Gi
+  storageClassName: ""
+  database: emotional_infrastructure
+  username: ei
+  # In staging/production, set postgres.enabled=false and point
+  # secrets.databaseUrl at a managed database instead.
+
+secrets:
+  # Name of an existing Kubernetes Secret with keys: database-url,
+  # ledger-hmac-secret, postgres-password. Leave empty to have the chart
+  # generate one from the values below (local/dev only -- values.yaml is
+  # not an acceptable place to keep real secrets).
+  existingSecretName: ""
+  databaseUrl: "postgresql+psycopg://ei:ei@RELEASE_NAME-postgres:5432/emotional_infrastructure"
+  ledgerHmacSecret: "REQUIRED_SET_LEDGER_HMAC_SECRET"
+  postgresPassword: "ei"
+
+ingress:
+  enabled: false
+  className: ""
+  host: "REQUIRED_SET_INGRESS_HOST"
+  tls:
+    enabled: false
+    secretName: ""
+  annotations: {}

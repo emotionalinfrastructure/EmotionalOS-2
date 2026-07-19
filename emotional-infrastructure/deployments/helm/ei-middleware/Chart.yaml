@@ -1,0 +1,19 @@
+apiVersion: v2
+name: ei-middleware
+description: >-
+  Emotional Infrastructure Governance Runtime -- candidate governance
+  architecture / reference implementation Helm chart. Not certified, not
+  production-validated, not externally audited. Deploys the CTP/PDEV/EGL/
+  TAR/Trajectory/Dignity-Ledger API, the governance dashboard, and (for
+  local/staging use) an in-cluster PostgreSQL instance.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - emotional-infrastructure
+  - ai-governance
+  - consent
+  - reference-implementation
+home: https://github.com/emotional-infrastructure/emotionalos-2
+maintainers:
+  - name: Emotional Infrastructure

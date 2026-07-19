@@ -1,0 +1,28 @@
+{
+  "name": "@emotional-infrastructure/policy-engine",
+  "version": "0.1.0",
+  "description": "Client-side port of the Policy Engine's default rules and condition matcher, for local pre-checks before calling POST /policy/evaluate.",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.1",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "license": "Apache-2.0"
+}

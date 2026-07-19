@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Emotional Infrastructure Governance Runtime</title>
+<style>
+  :root { --bg:#f6f7f9; --panel:#fff; --border:#dfe3ea; --text:#1a2233; --muted:#5b6472; --accent:#2c3e6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 56px 24px 96px; }
+  h1 { font-size: 28px; margin-bottom: 6px; }
+  .tag { color: var(--muted); font-size: 15px; margin-bottom: 32px; }
+  .banner { background:#eef1f8; border:1px solid var(--border); border-radius:8px; padding:16px 20px; font-size:14px; color:var(--muted); margin-bottom:32px; line-height:1.6; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 18px; margin-bottom: 10px; }
+  p { line-height: 1.7; color: var(--text); }
+  ul { line-height: 1.9; }
+  code { background:#eef1f8; padding: 1px 6px; border-radius: 4px; font-size: 0.9em; }
+  a { color: var(--accent); }
+  .modules { display:grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .module { background: var(--panel); border:1px solid var(--border); border-radius:8px; padding:14px 16px; }
+  .module h3 { margin:0 0 4px; font-size:14px; }
+  .module p { margin:0; font-size:13px; color:var(--muted); }
+  footer { color: var(--muted); font-size: 12.5px; border-top:1px solid var(--border); padding-top:20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Emotional Infrastructure&trade; Governance Runtime</h1>
+  <p class="tag">Candidate governance architecture &middot; reference implementation &middot; developer prototype</p>
+
+  <div class="banner">
+    This is a reference implementation, not a certified, production-ready,
+    legally compliant, regulator-approved, externally audited, clinically
+    validated, or benchmark-proven system. See
+    <a href="../../docs/CLAIM_BOUNDARY.md">docs/CLAIM_BOUNDARY.md</a> in the
+    repository for the full claim boundary.
+  </div>
+
+  <section>
+    <h2>What this is</h2>
+    <p>
+      A working developer reference implementation for AI-mediated trust
+      governance: a Consent Token Protocol (CTP), PDEV middleware (Purpose,
+      Dignity, Evidence, Veto), an Emotional Governance Layer (EGL),
+      Temporal Affective Regulation (TAR), Trajectory Governance, a
+      hash-chained Dignity Ledger&trade;, a Behavioral Signal Taxonomy, a
+      rule-based Policy Engine, a Claim Boundary Scanner, and a TypeScript
+      SDK -- all backed by real endpoints, real PostgreSQL persistence,
+      and a real governance dashboard.
+    </p>
+  </section>
+
+  <section>
+    <h2>Governance modules</h2>
+    <div class="modules">
+      <div class="module"><h3>CTP</h3><p>Scoped, revocable, context-bound consent tokens (ES256 JWT, &le;300s lifetime).</p></div>
+      <div class="module"><h3>PDEV</h3><p>Purpose / Dignity / Evidence / Veto gate evaluation for every protected request.</p></div>
+      <div class="module"><h3>EGL</h3><p>Signal-tier classification, a dynamic circuit breaker, and consent step-up.</p></div>
+      <div class="module"><h3>TAR</h3><p>Inference is not authorization -- time-boxed, risk-scoped action authorization.</p></div>
+      <div class="module"><h3>Trajectory Governance</h3><p>System-level, content-free longitudinal authority-formation checks.</p></div>
+      <div class="module"><h3>Dignity Ledger&trade;</h3><p>Append-only, hash-chained, metadata-only governance decision log.</p></div>
+      <div class="module"><h3>Policy Engine</h3><p>Priority-ordered, auditable rule evaluation.</p></div>
+      <div class="module"><h3>Claim Boundary Scanner</h3><p>Flags overclaiming language in public-facing copy.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Get started</h2>
+    <ul>
+      <li>Developer guide: <code>docs/README.md</code></li>
+      <li>API reference: <code>docs/API_REFERENCE.md</code></li>
+      <li>Architecture: <code>docs/ARCHITECTURE.md</code></li>
+      <li>Validation status: <code>docs/VALIDATION_PLAN.md</code></li>
+    </ul>
+  </section>
+
+  <footer>
+    Emotional Infrastructure&trade; Governance Runtime -- candidate governance architecture / reference implementation. Not certified. Not production-validated. Not externally audited.
+  </footer>
+</div>
+</body>
+</html>

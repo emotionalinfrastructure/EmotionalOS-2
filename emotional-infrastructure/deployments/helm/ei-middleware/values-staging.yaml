@@ -1,0 +1,39 @@
+# Staging overlay: helm install ei-middleware ./ei-middleware -f values-staging.yaml
+# Every REQUIRED_* placeholder below must be replaced before deploying --
+# this file intentionally does not ship working staging secrets.
+
+api:
+  image:
+    repository: REQUIRED_SET_STAGING_IMAGE_REPO/ei-middleware-api
+    tag: "REQUIRED_SET_IMAGE_TAG"
+  replicaCount: 2
+  env:
+    jwtIssuer: "REQUIRED_SET_STAGING_ISSUER_URL"
+    corsOrigins: "REQUIRED_SET_STAGING_CORS_ORIGIN"
+
+web:
+  image:
+    repository: REQUIRED_SET_STAGING_IMAGE_REPO/ei-middleware-web
+    tag: "REQUIRED_SET_IMAGE_TAG"
+  replicaCount: 2
+  env:
+    apiBaseUrl: "REQUIRED_SET_STAGING_API_BASE_URL"
+
+postgres:
+  enabled: true
+  storage: 10Gi
+
+secrets:
+  existingSecretName: "ei-middleware-staging-secrets"
+
+ingress:
+  enabled: true
+  className: "REQUIRED_SET_INGRESS_CLASS"
+  host: "REQUIRED_SET_STAGING_INGRESS_HOST"
+  tls:
+    enabled: true
+    secretName: "REQUIRED_SET_STAGING_TLS_SECRET"
+  annotations:
+    # Example: restrict staging to an internal CIDR allowlist at the
+    # ingress controller. Fill in the real staging allowlist before use.
+    nginx.ingress.kubernetes.io/whitelist-source-range: "REQUIRED_SET_STAGING_CIDR_ALLOWLIST"

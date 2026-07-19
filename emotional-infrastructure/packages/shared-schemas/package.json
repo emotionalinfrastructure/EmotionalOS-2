@@ -1,0 +1,31 @@
+{
+  "name": "@emotional-infrastructure/shared-schemas",
+  "version": "0.1.0",
+  "description": "Shared TypeScript types and runtime (zod) schemas for Emotional Infrastructure payloads (CTP context envelope, PDEV/EGL/TAR/Trajectory/Ledger shapes).",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.1",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "license": "Apache-2.0"
+}

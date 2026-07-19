@@ -1,0 +1,22 @@
+Emotional Infrastructure Governance Runtime -- {{ .Release.Name }}
+
+This is a candidate governance architecture / reference implementation
+deployment, not a certified or production-validated one. See
+docs/CLAIM_BOUNDARY.md and docs/VALIDATION_PLAN.md before relying on it
+for anything beyond development or evaluation.
+
+API service:  {{ .Release.Name }}-api:{{ .Values.api.port }}
+Web service:  {{ .Release.Name }}-web:{{ .Values.web.port }}
+
+{{- if .Values.ingress.enabled }}
+Ingress host: {{ .Values.ingress.host }}
+{{- else }}
+Ingress is disabled. Use `kubectl port-forward` to reach the services locally, e.g.:
+  kubectl port-forward svc/{{ .Release.Name }}-web {{ .Values.web.port }}:{{ .Values.web.port }}
+  kubectl port-forward svc/{{ .Release.Name }}-api {{ .Values.api.port }}:{{ .Values.api.port }}
+{{- end }}
+
+Before deploying to staging or production, replace every REQUIRED_* placeholder
+in values-staging.yaml / values-production.yaml: image tags, ingress host,
+CORS origin, and secrets. This chart's Kubernetes deployment has not been
+executed or tested in this reference implementation.

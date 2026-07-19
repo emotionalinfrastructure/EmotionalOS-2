@@ -1,0 +1,55 @@
+{
+  "name": "@emotional-infrastructure/eis-sdk",
+  "version": "0.3.0",
+  "description": "Emotional Infrastructure Standard SDK: consent lifecycle, CTP context/canonicalization, Dignity Ledger verification, PDEV/TAR/Trajectory client evaluators, EGL signal-tier classification, and claim-boundary scanning for AI-mediated trust governance.",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:modules": "node scripts/verify-dual-module.mjs",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm test && npm run build && npm run test:modules"
+  },
+  "dependencies": {
+    "@emotional-infrastructure/audit-ledger": "*",
+    "@emotional-infrastructure/policy-engine": "*",
+    "@emotional-infrastructure/shared-schemas": "*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsup": "^8.0.1",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "emotional-infrastructure",
+    "ai-governance",
+    "consent",
+    "audit",
+    "ctp",
+    "pdev",
+    "dignity-ledger"
+  ],
+  "author": "Brittany Wright",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false
+}

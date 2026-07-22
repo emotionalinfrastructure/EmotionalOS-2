@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ei-middleware
+description: Emotional Infrastructure (EI) Safety Middleware
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

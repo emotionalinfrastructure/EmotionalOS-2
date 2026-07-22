@@ -1,0 +1,65 @@
+# values-production.yaml
+
+replicaCount: 3  # ≥2 for HA
+
+ui:
+  enabled: false  # do NOT expose /ui in prod (route not registered)
+
+env:
+  AUTH_MODE: jwt
+  EI_POLICY_VERSION: v0.1.0
+  EI_LOCALE: us-en
+  LLM_TIMEOUT_MS: "12000"
+  LLM_MAX_RETRIES: "2"
+  BODY_LIMIT_BYTES: "1000000"
+  MAX_INPUT_CHARS: "4000"
+  HYSTERESIS_N: "2"
+
+secretEnv:
+  LLM_API_KEY: ""
+  API_KEY: ""
+  JWT_PUBLIC_KEY: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: ei.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - ei.example.com
+      secretName: ei-tls

@@ -1,0 +1,15 @@
+name = "emotional-infra-middleware"
+main = "index.js"
+compatibility_date = "2023-09-19"
+
+[vars]
+EI_ENABLED        = "true"
+EI_POLICY_VERSION = "v0.1.0"
+EI_LOCALE         = "us-en"
+MAX_INPUT_CHARS   = "4000"
+AUTH_MODE         = "key"
+# Point at the deployed EIOS Gateway; override per environment
+EIOS_GATEWAY_URL  = "http://localhost:8080"
+
+# Secrets — set via: wrangler secret put API_KEY
+# wrangler secret put JWT_PUBLIC_KEY

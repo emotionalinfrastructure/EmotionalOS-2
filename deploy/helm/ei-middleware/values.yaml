@@ -1,0 +1,131 @@
+replicaCount: 2
+
+image:
+  repository: yourrepo/ei-middleware
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ei.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+podAnnotations:
+  # prometheus.io/scrape: "true"
+  # prometheus.io/port: "8080"
+  # prometheus.io/path: /metrics
+  {}
+
+env:
+  EI_ENABLED: "true"
+  EI_POLICY_VERSION: "v0.1.0"
+  EI_LOCALE: "us-en"
+  LLM_BASE_URL: "https://api.openai.com/v1"
+  LLM_MODEL: "gpt-4o-mini"
+  LLM_TIMEOUT_MS: "12000"
+  LLM_MAX_RETRIES: "2"
+  MAX_INPUT_CHARS: "4000"
+  RATE_LIMIT_RPS: "5"
+  RATE_LIMIT_BURST: "10"
+  CORS_ORIGIN: "*"
+  BODY_LIMIT_BYTES: "1000000"
+  HYSTERESIS_N: "2"
+  AUTH_MODE: "both"
+  # Optional custom policy path; if unset, version file will be used
+  # EI_POLICY_PATH: ""
+
+secretEnv:
+  # Fill these via --set or a Secret management tool
+  LLM_API_KEY: ""
+  API_KEY: ""
+  JWT_PUBLIC_KEY: ""
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+extraEnv: []
+extraEnvFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 3
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+
+ui:
+  enabled: true           # toggles /ui inspector exposure (env flag)
+  path: /                 # app already serves /ui; this flag exposes env UI_ENABLED
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ei.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []                 # e.g., [{ hosts: ["ei.example.com"], secretName: ei-tls }]

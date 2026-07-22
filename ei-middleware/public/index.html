@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emotional Infrastructure Middleware</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Emotional Infrastructure Middleware</h1>
+    <p>The SPEC-101 v1.0.1 safety layer for AI conversations.</p>
+  </header>
+  <main>
+    <section>
+      <h2>Quickstart</h2>
+      <pre><code>curl -X POST https://api.example.com/v1/turn \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"session_id": "demo-123", "user_message": "Hello"}'</code></pre>
+    </section>
+    <section>
+      <h2>Response</h2>
+      <pre><code>{
+  "session_id": "demo-123",
+  "route": "NORMAL",
+  "response": "[MODEL] I hear you saying: Hello",
+  "depth_policy": "full",
+  "metrics": { "nas": 1.0, "deltaA": 0.0, "rei": 2.0, "evi": 0.0, "cis": 1.0 },
+  "ei_enabled": true
+}</code></pre>
+    </section>
+  </main>
+</body>
+</html>

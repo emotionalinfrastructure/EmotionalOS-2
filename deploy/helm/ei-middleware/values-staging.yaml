@@ -1,0 +1,32 @@
+# values-staging.yaml
+replicaCount: 1
+
+ui:
+  enabled: true   # turn on /ui inspector
+
+env:
+  AUTH_MODE: both   # allow API key *and* JWT
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    nginx.ingress.kubernetes.io/whitelist-source-range: "203.0.113.0/24,198.51.100.0/24"
+  hosts:
+    - host: ei-staging.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - ei-staging.example.com
+      secretName: ei-staging-tls
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

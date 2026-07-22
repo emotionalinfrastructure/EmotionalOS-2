@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ei-middleware.fullname" . }}-config
+  labels:
+    {{- include "ei-middleware.labels" . | nindent 4 }}
+data:
+  {{- range $k, $v := .Values.env }}
+  {{ $k }}: "{{ $v }}"
+  {{- end }}
